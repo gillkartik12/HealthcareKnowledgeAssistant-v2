@@ -1,0 +1,6 @@
+@HealthcareKnowledgeAssistant_HostAddress = http://localhost:5020
+
+GET {{HealthcareKnowledgeAssistant_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

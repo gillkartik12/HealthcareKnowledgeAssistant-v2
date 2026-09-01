@@ -1,0 +1,24 @@
+# Build output
+bin/
+obj/
+
+# IDE
+.vs/
+*.user
+*.suo
+
+# Secrets / local environment
+.env
+appsettings.Local.json
+*.publishSettings
+
+# Terraform working/state files
+Terraform/.terraform/
+Terraform/*.tfstate
+Terraform/*.tfstate.*
+Terraform/crash.log
+Terraform/*.tfvars
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,2407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Healthcare Knowledge Assistant</title>
+    <style>
+        :root {
+            --bg: #f1f5f9;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-2: #64748b;
+            --accent: #0d9488;
+            --accent-soft: #ccfbf1;
+            --accent-contrast: #ffffff;
+            --user-bubble: #0d9488;
+            --user-bubble-text: #ffffff;
+            --green: #16a34a;
+            --green-bg: #dcfce7;
+            --amber: #d97706;
+            --amber-bg: #fef3c7;
+            --red: #dc2626;
+            --red-bg: #fee2e2;
+            --blue: #2563eb;
+            --blue-bg: #dbeafe;
+            --shadow: 0 1px 3px rgba(15, 23, 42, .08), 0 1px 2px rgba(15, 23, 42, .04);
+            --radius: 12px;
+        }
+
+        html[data-theme="dark"] {
+            --bg: #0b1220;
+            --surface: #111a2e;
+            --surface-2: #0e1626;
+            --border: #243049;
+            --text: #e2e8f0;
+            --text-2: #8fa3bf;
+            --accent: #2dd4bf;
+            --accent-soft: #134e4a;
+            --accent-contrast: #04211e;
+            --user-bubble: #0f766e;
+            --user-bubble-text: #f0fdfa;
+            --green: #4ade80;
+            --green-bg: #14532d;
+            --amber: #fbbf24;
+            --amber-bg: #573a05;
+            --red: #f87171;
+            --red-bg: #5c1a1a;
+            --blue: #60a5fa;
+            --blue-bg: #1e3a8a;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .4);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14.5px;
+            line-height: 1.55;
+        }
+
+        button {
+            font: inherit;
+            cursor: pointer;
+        }
+
+        input, select, textarea {
+            font: inherit;
+            color: var(--text);
+        }
+
+        /* ---------- Layout ---------- */
+        .app {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ---------- Sidebar ---------- */
+        .sidebar {
+            width: 290px;
+            min-width: 290px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 18px 18px 14px;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-contrast);
+            flex-shrink: 0;
+        }
+
+        .brand h1 {
+            font-size: 15px;
+            margin: 0;
+            line-height: 1.25;
+        }
+
+        .brand span {
+            font-size: 11.5px;
+            color: var(--text-2);
+        }
+
+        .nav {
+            padding: 6px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 9px 12px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-2);
+            font-weight: 600;
+            font-size: 13.5px;
+            text-align: left;
+        }
+
+            .nav-btn svg {
+                flex-shrink: 0;
+            }
+
+            .nav-btn:hover {
+                background: var(--surface-2);
+                color: var(--text);
+            }
+
+            .nav-btn.active {
+                background: var(--accent-soft);
+                color: var(--accent);
+            }
+
+        .side-section {
+            padding: 14px 18px 4px;
+            border-top: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+            .side-section h3 {
+                margin: 0 0 10px;
+                font-size: 11px;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+                color: var(--text-2);
+            }
+
+        .field {
+            margin-bottom: 11px;
+        }
+
+            .field label {
+                display: block;
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--text-2);
+                margin-bottom: 4px;
+            }
+
+            .field select, .field input {
+                width: 100%;
+                padding: 7px 9px;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                background: var(--surface-2);
+                outline: none;
+            }
+
+                .field select:focus, .field input:focus {
+                    border-color: var(--accent);
+                }
+
+        .field-row {
+            display: flex;
+            gap: 10px;
+        }
+
+            .field-row .field {
+                flex: 1;
+            }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 14px 18px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text-2);
+            border-radius: 8px;
+            padding: 6px 11px;
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+            .theme-toggle:hover {
+                color: var(--text);
+            }
+
+        /* ---------- Main ---------- */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .topbar {
+            height: 58px;
+            flex-shrink: 0;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 22px;
+        }
+
+            .topbar h2 {
+                font-size: 16px;
+                margin: 0;
+            }
+
+            .topbar .spacer {
+                flex: 1;
+            }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 11px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text-2);
+        }
+
+            .pill .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: var(--green);
+            }
+
+        .view {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+        }
+
+            .view.active {
+                display: flex;
+                flex-direction: column;
+            }
+
+        /* ---------- Chat ---------- */
+        #view-chat.active {
+            display: flex;
+        }
+
+        .chat-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 26px 0;
+        }
+
+        .chat-inner {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .empty-state {
+            text-align: center;
+            margin-top: 9vh;
+            color: var(--text-2);
+        }
+
+            .empty-state .big-icon {
+                width: 64px;
+                height: 64px;
+                border-radius: 18px;
+                margin: 0 auto 16px;
+                background: var(--accent-soft);
+                color: var(--accent);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .empty-state h3 {
+                color: var(--text);
+                font-size: 19px;
+                margin: 0 0 6px;
+            }
+
+            .empty-state p {
+                margin: 0 auto 22px;
+                max-width: 420px;
+                font-size: 13.5px;
+            }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            justify-content: center;
+        }
+
+        .suggestion {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 7px 15px;
+            font-size: 13px;
+        }
+
+            .suggestion:hover {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+        .msg {
+            display: flex;
+            gap: 12px;
+        }
+
+            .msg.user {
+                flex-direction: row-reverse;
+            }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .msg.user .avatar {
+            background: var(--user-bubble);
+            color: var(--user-bubble-text);
+        }
+
+        .msg.bot .avatar {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .bubble-wrap {
+            max-width: 78%;
+            min-width: 0;
+        }
+
+        .msg.user .bubble-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .bubble {
+            padding: 11px 15px;
+            border-radius: var(--radius);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow-wrap: break-word;
+        }
+
+        .msg.user .bubble {
+            background: var(--user-bubble);
+            color: var(--user-bubble-text);
+            border: none;
+        }
+
+        .bubble p {
+            margin: 0 0 8px;
+        }
+
+            .bubble p:last-child {
+                margin: 0;
+            }
+
+        .bubble ul {
+            margin: 4px 0;
+            padding-left: 20px;
+        }
+
+        .meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 7px;
+            margin-top: 8px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 999px;
+        }
+
+            .badge.high {
+                background: var(--green-bg);
+                color: var(--green);
+            }
+
+            .badge.medium {
+                background: var(--amber-bg);
+                color: var(--amber);
+            }
+
+            .badge.low {
+                background: var(--red-bg);
+                color: var(--red);
+            }
+
+            .badge.info {
+                background: var(--blue-bg);
+                color: var(--blue);
+            }
+
+            .badge.plain {
+                background: var(--surface-2);
+                color: var(--text-2);
+                border: 1px solid var(--border);
+            }
+
+        .warning-box {
+            margin-top: 9px;
+            padding: 9px 12px;
+            border-radius: 9px;
+            background: var(--amber-bg);
+            color: var(--amber);
+            font-size: 12.5px;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        details.expander {
+            margin-top: 9px;
+        }
+
+            details.expander summary {
+                cursor: pointer;
+                font-size: 12.5px;
+                font-weight: 600;
+                color: var(--text-2);
+                user-select: none;
+                list-style: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+                details.expander summary::-webkit-details-marker {
+                    display: none;
+                }
+
+                details.expander summary::before {
+                    content: "▸";
+                    transition: transform .15s;
+                }
+
+            details.expander[open] summary::before {
+                transform: rotate(90deg);
+            }
+
+            details.expander summary:hover {
+                color: var(--accent);
+            }
+
+        .expander-body {
+            margin-top: 7px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--surface-2);
+            padding: 10px 12px;
+            font-size: 12.5px;
+        }
+
+        .source-item {
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .source-item:last-child {
+                border-bottom: none;
+            }
+
+        .source-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-weight: 600;
+        }
+
+        .source-snippet {
+            color: var(--text-2);
+            margin-top: 4px;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: 170px 1fr;
+            gap: 3px 12px;
+        }
+
+            .kv dt {
+                color: var(--text-2);
+            }
+
+            .kv dd {
+                margin: 0;
+                font-weight: 600;
+            }
+
+        .fb-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 9px;
+            align-items: center;
+        }
+
+        .fb-btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-2);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 12.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .fb-btn:hover {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+            .fb-btn.selected {
+                background: var(--accent-soft);
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+        .fb-thanks {
+            font-size: 12px;
+            color: var(--text-2);
+        }
+
+        .typing {
+            display: inline-flex;
+            gap: 4px;
+            padding: 6px 2px;
+        }
+
+            .typing span {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: var(--text-2);
+                animation: blink 1.2s infinite both;
+            }
+
+                .typing span:nth-child(2) {
+                    animation-delay: .2s;
+                }
+
+                .typing span:nth-child(3) {
+                    animation-delay: .4s;
+                }
+
+        @keyframes blink {
+            0%, 80%, 100% {
+                opacity: .25;
+            }
+
+            40% {
+                opacity: 1;
+            }
+        }
+
+        /* Composer */
+        .composer-bar {
+            flex-shrink: 0;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+            padding: 14px 24px 16px;
+        }
+
+        .composer {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .composer-box {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--surface-2);
+            padding: 9px 10px 9px 16px;
+        }
+
+            .composer-box:focus-within {
+                border-color: var(--accent);
+            }
+
+        .composer textarea {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            resize: none;
+            max-height: 150px;
+            padding: 4px 0;
+            line-height: 1.5;
+        }
+
+        .send-btn {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 10px;
+            background: var(--accent);
+            color: var(--accent-contrast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+            .send-btn:disabled {
+                opacity: .45;
+                cursor: default;
+            }
+
+        .composer-foot {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-2);
+        }
+
+            .composer-foot .spacer {
+                flex: 1;
+            }
+
+        .mode-switch {
+            display: inline-flex;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+            .mode-switch button {
+                border: none;
+                background: var(--surface);
+                color: var(--text-2);
+                padding: 4px 12px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+                .mode-switch button.active {
+                    background: var(--accent);
+                    color: var(--accent-contrast);
+                }
+
+        .link-btn {
+            border: none;
+            background: none;
+            color: var(--text-2);
+            font-size: 12px;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+            .link-btn:hover {
+                color: var(--red);
+            }
+
+        /* ---------- Generic cards / tables ---------- */
+        .page {
+            max-width: 1060px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 26px 26px 40px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px 22px;
+            margin-bottom: 20px;
+        }
+
+            .card h3 {
+                margin: 0 0 4px;
+                font-size: 15px;
+            }
+
+            .card .sub {
+                color: var(--text-2);
+                font-size: 12.5px;
+                margin: 0 0 16px;
+            }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+            .card-head h3 {
+                margin: 0;
+                flex: 1;
+            }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--surface);
+            color: var(--text);
+            padding: 8px 15px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+            .btn:hover {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+            .btn.primary {
+                background: var(--accent);
+                border-color: var(--accent);
+                color: var(--accent-contrast);
+            }
+
+                .btn.primary:hover {
+                    opacity: .92;
+                    color: var(--accent-contrast);
+                }
+
+            .btn.danger:hover {
+                border-color: var(--red);
+                color: var(--red);
+            }
+
+            .btn:disabled {
+                opacity: .5;
+                cursor: default;
+            }
+
+            .btn.small {
+                padding: 5px 11px;
+                font-size: 12px;
+            }
+
+        table.data {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+            table.data th {
+                text-align: left;
+                padding: 8px 10px;
+                color: var(--text-2);
+                font-size: 11.5px;
+                text-transform: uppercase;
+                letter-spacing: .05em;
+                border-bottom: 1px solid var(--border);
+                white-space: nowrap;
+            }
+
+            table.data td {
+                padding: 9px 10px;
+                border-bottom: 1px solid var(--border);
+                vertical-align: top;
+            }
+
+            table.data tr:last-child td {
+                border-bottom: none;
+            }
+
+            table.data tr:hover td {
+                background: var(--surface-2);
+            }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .muted {
+            color: var(--text-2);
+        }
+
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        .clamp {
+            max-width: 340px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* Upload */
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 30px 20px;
+            text-align: center;
+            color: var(--text-2);
+            background: var(--surface-2);
+            transition: border-color .15s, background .15s;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+            .dropzone:hover, .dropzone.dragover {
+                border-color: var(--accent);
+                background: var(--accent-soft);
+                color: var(--accent);
+            }
+
+            .dropzone strong {
+                color: var(--text);
+            }
+
+            .dropzone.dragover strong {
+                color: var(--accent);
+            }
+
+        .upload-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+            .upload-controls .field {
+                margin: 0;
+                min-width: 170px;
+            }
+
+        .file-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+        .processing-card {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface-2);
+            display: none;
+        }
+
+            .processing-card.show {
+                display: block;
+            }
+
+        .processing-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .processing-title {
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .processing-file {
+            color: var(--text-2);
+            font-size: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .processing-steps {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .processing-step {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: var(--text-2);
+            background: var(--surface);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+            .processing-step.done {
+                border-color: var(--green);
+                color: var(--green);
+                background: var(--green-bg);
+            }
+
+            .processing-step.active {
+                border-color: var(--amber);
+                color: var(--amber);
+                background: var(--amber-bg);
+            }
+
+            .processing-step.failed {
+                border-color: var(--red);
+                color: var(--red);
+                background: var(--red-bg);
+            }
+
+        .processing-error {
+            margin-top: 9px;
+            color: var(--red);
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 900px) {
+            .processing-steps {
+                grid-template-columns: repeat(2, minmax(120px, 1fr));
+            }
+        }
+
+        /* Stats */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 15px 17px;
+        }
+
+            .stat .label {
+                font-size: 11.5px;
+                text-transform: uppercase;
+                letter-spacing: .06em;
+                color: var(--text-2);
+                font-weight: 700;
+            }
+
+            .stat .value {
+                font-size: 25px;
+                font-weight: 700;
+                margin-top: 3px;
+            }
+
+                .stat .value.green {
+                    color: var(--green);
+                }
+
+                .stat .value.amber {
+                    color: var(--amber);
+                }
+
+                .stat .value.red {
+                    color: var(--red);
+                }
+
+                .stat .value.accent {
+                    color: var(--accent);
+                }
+
+        .toast {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 50;
+            background: var(--text);
+            color: var(--bg);
+            padding: 11px 17px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 6px 22px rgba(0,0,0,.25);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all .25s;
+            pointer-events: none;
+        }
+
+            .toast.show {
+                opacity: 1;
+                transform: none;
+            }
+
+        /* ---------- Responsive navigation ---------- */
+        .mobile-menu-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface-2);
+            color: var(--text);
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+            .mobile-menu-btn:hover {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .42);
+            z-index: 90;
+            opacity: 0;
+            transition: opacity .2s ease;
+        }
+
+        /* Tablet */
+        @media (min-width: 861px) and (max-width: 1100px) {
+            .sidebar {
+                width: 245px;
+                min-width: 245px;
+            }
+
+            .brand {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .side-section {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .page {
+                padding: 22px 20px 34px;
+            }
+
+            .chat-inner {
+                max-width: 760px;
+                padding: 0 20px;
+            }
+
+            .composer {
+                max-width: 760px;
+            }
+
+            .processing-steps {
+                grid-template-columns: repeat(2, minmax(120px, 1fr));
+            }
+        }
+
+        /* Phone / small tablet */
+        @media (max-width: 860px) {
+            html, body {
+                height: 100%;
+            }
+
+            body {
+                overflow: hidden;
+            }
+
+            .app {
+                height: 100dvh;
+            }
+
+            .sidebar {
+                display: flex;
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: min(86vw, 320px);
+                min-width: 0;
+                z-index: 100;
+                transform: translateX(-105%);
+                transition: transform .22s ease;
+                box-shadow: 12px 0 30px rgba(15, 23, 42, .18);
+            }
+
+                .sidebar.open {
+                    transform: translateX(0);
+                }
+
+            .sidebar-overlay.show {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-menu-btn {
+                display: inline-flex;
+            }
+
+            .main {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .topbar {
+                height: 56px;
+                padding: 0 14px;
+                gap: 10px;
+            }
+
+                .topbar h2 {
+                    font-size: 15px;
+                }
+
+            .page {
+                max-width: none;
+                padding: 18px 14px 28px;
+            }
+
+            .card {
+                padding: 16px;
+                margin-bottom: 14px;
+            }
+
+            .card-head {
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .chat-scroll {
+                padding: 18px 0;
+            }
+
+            .chat-inner {
+                padding: 0 12px;
+                gap: 14px;
+            }
+
+            .empty-state {
+                margin-top: 5vh;
+            }
+
+                .empty-state p {
+                    max-width: 92%;
+                }
+
+            .bubble-wrap {
+                max-width: 88%;
+            }
+
+            .bubble {
+                padding: 10px 12px;
+            }
+
+            .avatar {
+                width: 30px;
+                height: 30px;
+            }
+
+            .composer-bar {
+                padding: 10px 12px 12px;
+            }
+
+            .composer-box {
+                padding: 7px 8px 7px 12px;
+            }
+
+            .send-btn {
+                width: 42px;
+                height: 42px;
+            }
+
+            .composer-foot {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+                .composer-foot .spacer {
+                    display: none;
+                }
+
+            .mode-switch {
+                order: 1;
+            }
+
+            #modeHint {
+                order: 3;
+                width: 100%;
+                font-size: 11px;
+            }
+
+            .link-btn {
+                margin-left: auto;
+                order: 2;
+            }
+
+            .upload-controls {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                align-items: end;
+            }
+
+                .upload-controls .field {
+                    min-width: 0;
+                    width: 100%;
+                }
+
+                    .upload-controls .field select,
+                    .upload-controls .field input {
+                        min-height: 44px;
+                    }
+
+            .file-chip {
+                grid-column: 1 / -1;
+                max-width: 100%;
+                overflow-wrap: anywhere;
+            }
+
+            #uploadBtn {
+                grid-column: 1 / -1;
+                justify-content: center;
+                min-height: 44px;
+            }
+
+            .dropzone {
+                padding: 24px 14px;
+            }
+
+            .processing-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .processing-steps {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .stat-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .stat {
+                padding: 13px 14px;
+            }
+
+                .stat .value {
+                    font-size: 22px;
+                }
+
+            .table-wrap {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table.data {
+                min-width: 680px;
+            }
+
+            .btn,
+            .nav-btn,
+            .theme-toggle,
+            .suggestion,
+            .fb-btn {
+                min-height: 42px;
+            }
+
+            .field select,
+            .field input,
+            textarea {
+                font-size: 16px; /* prevents iOS auto-zoom */
+            }
+        }
+
+        /* Small phones */
+        @media (max-width: 560px) {
+            .topbar {
+                padding: 0 10px;
+            }
+
+            #chunkPill {
+                display: none;
+            }
+
+            .page {
+                padding: 14px 10px 24px;
+            }
+
+            .card {
+                padding: 14px;
+                border-radius: 10px;
+            }
+
+            .upload-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .file-chip,
+            #uploadBtn {
+                grid-column: auto;
+            }
+
+            .processing-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stat .label {
+                font-size: 10.5px;
+            }
+
+            .suggestions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .suggestion {
+                width: 100%;
+            }
+
+            .bubble-wrap {
+                max-width: 91%;
+            }
+
+            .msg {
+                gap: 8px;
+            }
+
+            .kv {
+                grid-template-columns: 1fr;
+                gap: 2px;
+            }
+
+                .kv dd {
+                    margin-bottom: 7px;
+                }
+
+            .card-head .btn {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app">
+
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileMenu()"></div>
+
+        <!-- ============ Sidebar ============ -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+                </div>
+                <div>
+                    <h1>Healthcare Knowledge Assistant</h1>
+                    <span>RAG · Qdrant · Gemini</span>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <button class="nav-btn active" data-view="chat" onclick="switchView('chat')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                    Chat
+                </button>
+                <button class="nav-btn" data-view="documents" onclick="switchView('documents')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                    Documents
+                </button>
+                <button class="nav-btn" data-view="analytics" onclick="switchView('analytics')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
+                    Analytics
+                </button>
+            </nav>
+
+            <div class="side-section">
+                <h3>Retrieval Settings</h3>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="topK">Top K</label>
+                        <input id="topK" type="number" value="5" min="1" max="20" />
+                    </div>
+                    <div class="field">
+                        <label for="minScore">Min Score</label>
+                        <input id="minScore" type="number" value="0.2" step="0.05" min="0" max="1" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="sourceSelect">Document</label>
+                    <select id="sourceSelect"><option value="">All documents</option></select>
+                </div>
+                <div class="field">
+                    <label for="filterDepartment">Department</label>
+                    <select id="filterDepartment">
+                        <option value="">Auto-detect / All</option>
+                        <option>Scheduling</option>
+                        <option>Billing</option>
+                        <option>Radiology</option>
+                        <option>Operations</option>
+                        <option>Clinical</option>
+                        <option>Compliance</option>
+                        <option>General</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="filterDocumentType">Document Type</label>
+                    <select id="filterDocumentType">
+                        <option value="">All types</option>
+                        <option>Policy</option>
+                        <option>Workflow</option>
+                        <option>FAQ</option>
+                        <option>Training</option>
+                        <option>KnowledgeBase</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <span class="pill" id="docCountPill"><span class="dot"></span><span id="docCountText">0 docs</span></span>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span><span id="themeLabel">Dark</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ============ Main ============ -->
+        <main class="main">
+            <header class="topbar">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Open navigation" aria-expanded="false">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+                </button>
+                <h2 id="viewTitle">Chat</h2>
+                <div class="spacer"></div>
+                <span class="pill" id="chunkPill">0 chunks indexed</span>
+            </header>
+
+            <!-- ===== Chat view ===== -->
+            <section class="view active" id="view-chat">
+                <div class="chat-scroll" id="chatScroll">
+                    <div class="chat-inner" id="chatInner">
+                        <div class="empty-state" id="emptyState">
+                            <div class="big-icon">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                            </div>
+                            <h3>Ask your healthcare documents</h3>
+                            <p>Answers are grounded in your uploaded PDFs with sources, confidence scoring, hybrid search and Gemini reranking.</p>
+                            <div class="suggestions">
+                                <button class="suggestion" onclick="useSuggestion(this)">What is the patient scheduling policy?</button>
+                                <button class="suggestion" onclick="useSuggestion(this)">How are billing disputes handled?</button>
+                                <button class="suggestion" onclick="useSuggestion(this)">Summarize the radiology workflow</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="composer-bar">
+                    <div class="composer">
+                        <div class="composer-box">
+                            <textarea id="question" rows="1" placeholder="Ask a question about your uploaded documents…"
+                                      oninput="autoGrow(this)" onkeydown="composerKey(event)"></textarea>
+                            <button class="send-btn" id="sendBtn" onclick="sendQuestion()" title="Send">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                            </button>
+                        </div>
+                        <div class="composer-foot">
+                            <div class="mode-switch" title="Answer pipeline">
+                                <button id="modeHealthcare" class="active" onclick="setMode('healthcare')">Healthcare RAG+</button>
+                                <button id="modeGeneral" onclick="setMode('general')">General</button>
+                            </div>
+                            <span id="modeHint">Question rewriting · hybrid search · reranking · chat history</span>
+                            <div class="spacer"></div>
+                            <button class="link-btn" onclick="clearChat()">Clear chat</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Documents view ===== -->
+            <section class="view" id="view-documents">
+                <div class="page">
+                    <div class="card">
+                        <div class="card-head">
+                            <h3>Upload PDF</h3>
+                            <button class="btn danger small" onclick="resetDocuments()">Reset collection</button>
+                        </div>
+                        <div class="dropzone" id="dropzone"
+                             onclick="document.getElementById('pdfFile').click()">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                            <div><strong>Click to choose a PDF</strong> or drag &amp; drop it here</div>
+                            <div style="font-size:12px; margin-top:3px;">The PDF is processed, chunked, embedded with Gemini and indexed in Qdrant. Local cloud mode uses S3/SQS; hosted mode processes directly.</div>
+                        </div>
+                        <input type="file" id="pdfFile" accept="application/pdf" hidden onchange="fileChosen()" />
+                        <div class="upload-controls">
+                            <span class="file-chip" id="fileChip" style="display:none"></span>
+                            <div class="field">
+                                <label for="uploadDepartment">Department</label>
+                                <select id="uploadDepartment">
+                                    <option>Scheduling</option>
+                                    <option>Billing</option>
+                                    <option>Radiology</option>
+                                    <option>Operations</option>
+                                    <option>Clinical</option>
+                                    <option>Compliance</option>
+                                    <option>General</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="uploadDocumentType">Document Type</label>
+                                <select id="uploadDocumentType">
+                                    <option>Policy</option>
+                                    <option>Workflow</option>
+                                    <option>FAQ</option>
+                                    <option>Training</option>
+                                    <option>KnowledgeBase</option>
+                                </select>
+                            </div>
+                            <button class="btn primary" id="uploadBtn" onclick="uploadPdf()">Upload document</button>
+                        </div>
+                        <p class="muted" id="uploadStatus" style="margin:12px 0 0; font-size:12.5px;"></p>
+
+                        <div class="processing-card" id="processingCard">
+                            <div class="processing-head">
+                                <div>
+                                    <div class="processing-title">Document processing</div>
+                                    <div class="processing-file" id="processingFile"></div>
+                                </div>
+                                <span class="badge plain" id="processingBadge">Queued</span>
+                            </div>
+                            <div class="processing-steps">
+                                <div class="processing-step" id="stepUploaded">1. Uploaded</div>
+                                <div class="processing-step" id="stepQueued">2. Queued</div>
+                                <div class="processing-step" id="stepProcessing">3. Processing</div>
+                                <div class="processing-step" id="stepCompleted">4. Completed</div>
+                            </div>
+                            <div class="processing-error" id="processingError"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-grid" id="docStatGrid"></div>
+
+                    <div class="card">
+                        <div class="card-head">
+                            <h3>Indexed documents</h3>
+                            <button class="btn small" onclick="refreshDocuments()">Refresh</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data" id="docsTable">
+                                <thead><tr><th>Document</th><th>Department</th><th>Type</th><th>Chunks</th></tr></thead>
+                                <tbody><tr><td colspan="4" class="muted">No documents indexed yet.</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Analytics view ===== -->
+            <section class="view" id="view-analytics">
+                <div class="page">
+                    <div class="card-head" style="margin-bottom:14px;">
+                        <h3 style="font-size:15px;">RAG pipeline metrics</h3>
+                        <button class="btn small" onclick="refreshAnalytics()">Refresh</button>
+                        <button class="btn small" onclick="window.location.href='/api/rag-logs/export'">Export logs CSV</button>
+                        <button class="btn danger small" onclick="clearRagLogs()">Clear logs</button>
+                    </div>
+                    <div class="stat-grid" id="ragStatGrid"></div>
+
+                    <div class="card">
+                        <div class="card-head"><h3>RAG logs</h3></div>
+                        <div class="table-wrap">
+                            <table class="data" id="ragLogsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Question</th>
+                                        <th>Confidence</th>
+                                        <th>Score</th>
+                                        <th>Dept</th>
+                                        <th>V / K / H</th>
+                                        <th>Rerank</th>
+                                        <th>Fallback</th>
+                                    </tr>
+                                </thead>
+                                <tbody><tr><td colspan="8" class="muted">No logs yet.</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-head" style="margin:26px 0 14px;">
+                        <h3 style="font-size:15px;">User feedback</h3>
+                        <button class="btn small" onclick="window.location.href='/api/feedback/export'">Export feedback CSV</button>
+                        <button class="btn danger small" onclick="clearFeedback()">Clear feedback</button>
+                    </div>
+                    <div class="stat-grid" id="feedbackStatGrid"></div>
+
+                    <div class="card">
+                        <div class="card-head"><h3>Feedback entries</h3></div>
+                        <div class="table-wrap">
+                            <table class="data" id="feedbackTable">
+                                <thead><tr><th>Time</th><th>Question</th><th>Rating</th><th>Confidence</th><th>Score</th></tr></thead>
+                                <tbody><tr><td colspan="5" class="muted">No feedback yet.</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        /* ================= State ================= */
+        let mode = "healthcare";
+        let busy = false;
+        let chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+
+        /* ================= Helpers ================= */
+        const $ = id => document.getElementById(id);
+
+        function escapeHtml(s) {
+            return String(s ?? "")
+                .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+        }
+
+        /* Minimal markdown: bold, inline code, bullets, paragraphs */
+        function renderAnswer(text) {
+            const esc = escapeHtml(text);
+            const lines = esc.split(/\r?\n/);
+            let html = "", inList = false, para = [];
+            const flushPara = () => {
+                if (para.length) { html += "<p>" + para.join("<br>") + "</p>"; para = []; }
+            };
+            for (const raw of lines) {
+                const line = raw.trim();
+                const bullet = line.match(/^([*\-•])\s+(.*)/);
+                if (bullet) {
+                    flushPara();
+                    if (!inList) { html += "<ul>"; inList = true; }
+                    html += "<li>" + bullet[2] + "</li>";
+                } else {
+                    if (inList) { html += "</ul>"; inList = false; }
+                    if (line === "") flushPara(); else para.push(line);
+                }
+            }
+            if (inList) html += "</ul>";
+            flushPara();
+            return html
+                .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+                .replace(/`([^`]+)`/g, "<code>$1</code>");
+        }
+
+        function toast(msg) {
+            const t = $("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.remove("show"), 2600);
+        }
+
+        function fmtTime(iso) {
+            try { return new Date(iso).toLocaleString(); } catch { return iso; }
+        }
+
+        function confidenceClass(c) {
+            return { High: "high", Medium: "medium", Low: "low" }[c] || "plain";
+        }
+
+        async function api(url, options) {
+            const res = await fetch(url, {
+                cache: "no-store",
+                ...(options || {})
+            });
+            if (!res.ok) {
+                const body = await res.text();
+                throw new Error(body || `${res.status} ${res.statusText}`);
+            }
+            return res.json();
+        }
+
+        /* ================= Theme ================= */
+        function applyTheme(theme) {
+            document.documentElement.dataset.theme = theme;
+            $("themeIcon").textContent = theme === "dark" ? "☀️" : "🌙";
+            $("themeLabel").textContent = theme === "dark" ? "Light" : "Dark";
+            localStorage.setItem("theme", theme);
+        }
+        function toggleTheme() {
+            applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+        }
+        applyTheme(localStorage.getItem("theme") || "light");
+
+        /* ================= Mobile navigation ================= */
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector(".sidebar");
+            const overlay = $("sidebarOverlay");
+            const btn = $("mobileMenuBtn");
+            const open = !sidebar.classList.contains("open");
+
+            sidebar.classList.toggle("open", open);
+            overlay.classList.toggle("show", open);
+            btn?.setAttribute("aria-expanded", String(open));
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.querySelector(".sidebar");
+            sidebar?.classList.remove("open");
+            $("sidebarOverlay")?.classList.remove("show");
+            $("mobileMenuBtn")?.setAttribute("aria-expanded", "false");
+        }
+
+        window.addEventListener("resize", () => {
+            if (window.innerWidth > 860) closeMobileMenu();
+        });
+
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") closeMobileMenu();
+        });
+
+        /* ================= Views ================= */
+        function switchView(view) {
+            closeMobileMenu();
+            document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+            document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+            $("view-" + view).classList.add("active");
+            $("viewTitle").textContent = { chat: "Chat", documents: "Documents", analytics: "Analytics" }[view];
+            if (view === "analytics") refreshAnalytics();
+            if (view === "documents") refreshDocuments();
+        }
+
+        /* ================= Mode ================= */
+        function setMode(m) {
+            mode = m;
+            $("modeHealthcare").classList.toggle("active", m === "healthcare");
+            $("modeGeneral").classList.toggle("active", m === "general");
+            $("modeHint").textContent = m === "healthcare"
+                ? "Question rewriting · hybrid search · reranking · chat history"
+                : "Direct vector search · grounded answer";
+        }
+
+        /* ================= Chat rendering ================= */
+        function hideEmptyState() {
+            const e = $("emptyState");
+            if (e) e.remove();
+        }
+
+        function addUserMessage(text) {
+            hideEmptyState();
+            const div = document.createElement("div");
+            div.className = "msg user";
+            div.innerHTML = `
+            <div class="avatar">You</div>
+            <div class="bubble-wrap"><div class="bubble">${escapeHtml(text)}</div></div>`;
+            $("chatInner").appendChild(div);
+            scrollChat();
+        }
+
+        function addTyping() {
+            const div = document.createElement("div");
+            div.className = "msg bot";
+            div.id = "typingMsg";
+            div.innerHTML = `
+            <div class="avatar">AI</div>
+            <div class="bubble-wrap"><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`;
+            $("chatInner").appendChild(div);
+            scrollChat();
+        }
+        function removeTyping() { $("typingMsg")?.remove(); }
+
+        function addBotMessage(data, question) {
+            hideEmptyState();
+            const div = document.createElement("div");
+            div.className = "msg bot";
+
+            let metaBadges = "";
+            if (data.confidence) {
+                metaBadges += `<span class="badge ${confidenceClass(data.confidence)}">● ${escapeHtml(data.confidence)} confidence</span>`;
+                if (data.bestScore !== undefined && data.bestScore !== null)
+                    metaBadges += `<span class="badge plain">best score ${Number(data.bestScore).toFixed(3)}</span>`;
+            }
+            if (data.detectedDepartment)
+                metaBadges += `<span class="badge info">${escapeHtml(data.detectedDepartment)}</span>`;
+            if (data.usedFallbackSearch)
+                metaBadges += `<span class="badge plain">fallback search</span>`;
+            if (data.rerankingApplied)
+                metaBadges += `<span class="badge plain">reranked ${data.resultsBeforeReranking ?? "?"} → ${data.resultsAfterReranking ?? "?"}</span>`;
+
+            const warningHtml = data.warning
+                ? `<div class="warning-box">⚠️ ${escapeHtml(data.warning)}</div>` : "";
+
+            /* Sources expander */
+            let sourcesHtml = "";
+            const sources = data.sources || [];
+            if (sources.length) {
+                const ctx = data.retrievedContext || [];
+                const items = sources.map(s => {
+                    const snippet = ctx.find(c =>
+                        c.source === s.source && c.pageNumber === s.pageNumber);
+                    return `<div class="source-item">
+                    <div class="source-head">
+                        📄 ${escapeHtml(s.source)}
+                        <span class="badge plain">page ${s.pageNumber}</span>
+                        <span class="badge plain">score ${Number(s.score).toFixed(3)}</span>
+                        ${snippet?.retrievalType ? `<span class="badge info">${escapeHtml(snippet.retrievalType)}</span>` : ""}
+                    </div>
+                    ${snippet ? `<div class="source-snippet">${escapeHtml(snippet.text.slice(0, 400))}${snippet.text.length > 400 ? "…" : ""}</div>` : ""}
+                </div>`;
+                }).join("");
+                sourcesHtml = `
+                <details class="expander">
+                    <summary>Sources (${sources.length})</summary>
+                    <div class="expander-body">${items}</div>
+                </details>`;
+            }
+
+            /* Pipeline details expander */
+            const rs = data.retrievalSummary;
+            let detailsHtml = "";
+            const rows = [];
+            if (data.rewrittenQuestion && data.rewrittenQuestion !== question)
+                rows.push(["Rewritten question", escapeHtml(data.rewrittenQuestion)]);
+            if (rs) rows.push(["Retrieval mix", `vector ${rs.vectorResults} · keyword ${rs.keywordResults} · hybrid ${rs.hybridResults}`]);
+            if (data.usedFallbackSearch !== undefined)
+                rows.push(["Fallback search", data.usedFallbackSearch ? "yes (department filter relaxed)" : "no"]);
+            if (data.rerankingApplied !== undefined)
+                rows.push(["Gemini reranking", data.rerankingApplied ? `applied (${data.resultsBeforeReranking} → ${data.resultsAfterReranking})` : "not applied"]);
+            if (rows.length) {
+                detailsHtml = `
+                <details class="expander">
+                    <summary>Pipeline details</summary>
+                    <div class="expander-body"><dl class="kv">
+                        ${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}
+                    </dl></div>
+                </details>`;
+            }
+
+            div.innerHTML = `
+            <div class="avatar">AI</div>
+            <div class="bubble-wrap">
+                <div class="bubble">${renderAnswer(data.answer ?? "")}</div>
+                ${metaBadges ? `<div class="meta-row">${metaBadges}</div>` : ""}
+                ${warningHtml}
+                ${sourcesHtml}
+                ${detailsHtml}
+                <div class="fb-row">
+                    <button class="fb-btn" onclick="sendFeedback(this, 'Helpful')">👍 Helpful</button>
+                    <button class="fb-btn" onclick="sendFeedback(this, 'Not Helpful')">👎 Not helpful</button>
+                </div>
+            </div>`;
+
+            /* attach payload for feedback */
+            div._feedbackData = {
+                question,
+                answer: data.answer,
+                confidence: data.confidence,
+                bestScore: data.bestScore,
+                sources: data.sources,
+                rewrittenQuestion: data.rewrittenQuestion
+            };
+
+            $("chatInner").appendChild(div);
+            scrollChat();
+        }
+
+        function scrollChat() {
+            const sc = $("chatScroll");
+            sc.scrollTop = sc.scrollHeight;
+        }
+
+        function restoreChat() {
+            if (!chatHistory.length) return;
+            hideEmptyState();
+            for (const item of chatHistory) {
+                addUserMessage(item.question);
+                addBotMessage({
+                    answer: item.answer,
+                    confidence: item.confidence,
+                    bestScore: item.bestScore,
+                    sources: item.sources
+                }, item.question);
+            }
+        }
+
+        function clearChat() {
+            chatHistory = [];
+            localStorage.removeItem("chatHistory");
+            $("chatInner").innerHTML = "";
+            location.reload();
+        }
+
+        /* ================= Composer ================= */
+        function autoGrow(el) {
+            el.style.height = "auto";
+            el.style.height = Math.min(el.scrollHeight, 150) + "px";
+        }
+        function composerKey(e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendQuestion();
+            }
+        }
+        function useSuggestion(btn) {
+            $("question").value = btn.textContent;
+            sendQuestion();
+        }
+
+        /* ================= Ask ================= */
+        async function sendQuestion() {
+            const input = $("question");
+            const question = input.value.trim();
+            if (!question || busy) return;
+
+            busy = true;
+            $("sendBtn").disabled = true;
+            input.value = "";
+            autoGrow(input);
+
+            addUserMessage(question);
+            addTyping();
+
+            const body = {
+                question,
+                topK: Number($("topK").value) || 5,
+                minScore: Number($("minScore").value) || 0,
+                includeContext: true,
+                source: $("sourceSelect").value || null,
+                department: $("filterDepartment").value || null,
+                documentType: $("filterDocumentType").value || null
+            };
+
+            let url = "/api/ask";
+            if (mode === "healthcare") {
+                url = "/api/healthcare/ask";
+                body.chatHistory = chatHistory.slice(-3).map(x => ({
+                    question: x.question,
+                    answer: x.answer
+                }));
+            }
+
+            try {
+                const data = await api(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+
+                removeTyping();
+                addBotMessage(data, question);
+
+                chatHistory.push({
+                    question,
+                    answer: data.answer,
+                    confidence: data.confidence,
+                    bestScore: data.bestScore,
+                    sources: data.sources
+                });
+                localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+            } catch (err) {
+                removeTyping();
+                addBotMessage({ answer: "Something went wrong: " + err.message }, question);
+            } finally {
+                busy = false;
+                $("sendBtn").disabled = false;
+                input.focus();
+            }
+        }
+
+        /* ================= Feedback ================= */
+        async function sendFeedback(btn, rating) {
+            const msg = btn.closest(".msg");
+            if (!msg?._feedbackData) return;
+            try {
+                await api("/api/feedback", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ...msg._feedbackData, rating })
+                });
+                msg.querySelectorAll(".fb-btn").forEach(b => { b.disabled = true; b.classList.remove("selected"); });
+                btn.classList.add("selected");
+                btn.disabled = false;
+                const row = btn.closest(".fb-row");
+                if (!row.querySelector(".fb-thanks")) {
+                    const span = document.createElement("span");
+                    span.className = "fb-thanks";
+                    span.textContent = "Thanks for the feedback!";
+                    row.appendChild(span);
+                }
+            } catch (err) {
+                toast("Could not save feedback: " + err.message);
+            }
+        }
+
+        /* ================= Documents ================= */
+        function fileChosen() {
+            const file = $("pdfFile").files[0];
+            const chip = $("fileChip");
+            if (file) {
+                chip.style.display = "inline-flex";
+                chip.textContent = "📄 " + file.name;
+            } else {
+                chip.style.display = "none";
+            }
+        }
+
+        async function uploadPdf() {
+            const file = $("pdfFile").files[0];
+            if (!file) { toast("Choose a PDF first."); return; }
+
+            const btn = $("uploadBtn");
+            btn.disabled = true;
+            btn.textContent = "Uploading…";
+            $("uploadStatus").textContent = "Uploading PDF and starting document processing…";
+            resetProcessingUi();
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("department", $("uploadDepartment").value);
+            formData.append("documentType", $("uploadDocumentType").value);
+
+            try {
+                const data = await api("/api/documents/upload", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!data.documentId) {
+                    throw new Error("Upload succeeded but no documentId was returned by the API.");
+                }
+
+                const directMode = data.infrastructureMode === "Direct";
+
+                $("uploadStatus").textContent = directMode
+                    ? `✅ ${data.file} uploaded and processed successfully.`
+                    : `✅ ${data.file} uploaded successfully. Background processing has started.`;
+
+                showProcessingUi(data.file, data.status || "Queued");
+                updateProcessingUi(data.status || "Queued", directMode ? 1 : 0, null);
+
+                $("pdfFile").value = "";
+                fileChosen();
+                toast(directMode ? "Document processed." : "Document queued for processing.");
+
+                if (directMode && data.status === "Completed") {
+                    await refreshDocuments();
+                } else {
+                    await pollDocumentStatus(data.documentId);
+                }
+            } catch (err) {
+                $("uploadStatus").textContent = "❌ Upload failed: " + err.message;
+                updateProcessingUi("Failed", 0, err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Upload document";
+            }
+        }
+
+        function resetProcessingUi() {
+            $("processingCard").classList.remove("show");
+            $("processingFile").textContent = "";
+            $("processingBadge").textContent = "Queued";
+            $("processingError").textContent = "";
+
+            ["stepUploaded", "stepQueued", "stepProcessing", "stepCompleted"]
+                .forEach(id => $(id).className = "processing-step");
+        }
+
+        function showProcessingUi(fileName, status) {
+            $("processingCard").classList.add("show");
+            $("processingFile").textContent = fileName || "Document";
+            $("processingBadge").textContent = status || "Queued";
+        }
+
+        function updateProcessingUi(status, attemptCount, error) {
+            const uploaded = $("stepUploaded");
+            const queued = $("stepQueued");
+            const processing = $("stepProcessing");
+            const completed = $("stepCompleted");
+            const badge = $("processingBadge");
+
+            [uploaded, queued, processing, completed]
+                .forEach(el => el.className = "processing-step");
+
+            uploaded.classList.add("done");
+            badge.textContent = attemptCount > 0
+                ? `${status} · attempt ${attemptCount}`
+                : status;
+
+            switch (status) {
+                case "Queued":
+                    queued.classList.add("active");
+                    break;
+
+                case "Processing":
+                case "Retrying":
+                    queued.classList.add("done");
+                    processing.classList.add("active");
+                    break;
+
+                case "Completed":
+                    queued.classList.add("done");
+                    processing.classList.add("done");
+                    completed.classList.add("done");
+                    break;
+
+                case "Failed":
+                    queued.classList.add("done");
+                    processing.classList.add("failed");
+                    completed.classList.add("failed");
+                    break;
+            }
+
+            $("processingError").textContent =
+                error ? `Processing error: ${error}` : "";
+        }
+
+        async function pollDocumentStatus(documentId) {
+            const maxPolls = 60;
+            const delayMs = 2000;
+
+            for (let poll = 0; poll < maxPolls; poll++) {
+                const status = await api(
+                    `/api/documents/${encodeURIComponent(documentId)}/status`
+                );
+
+                showProcessingUi(status.fileName, status.status);
+                updateProcessingUi(
+                    status.status,
+                    status.attemptCount ?? 0,
+                    status.error
+                );
+
+                if (status.status === "Completed") {
+                    $("uploadStatus").textContent =
+                        `✅ ${status.fileName} is fully processed and ready for questions.`;
+                    toast("Document processing completed.");
+                    await refreshDocuments();
+                    return;
+                }
+
+                if (status.status === "Failed") {
+                    $("uploadStatus").textContent =
+                        `❌ ${status.fileName} could not be processed after ${status.attemptCount ?? 0} attempt(s).`;
+                    toast("Document processing failed.");
+                    return;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+            }
+
+            $("uploadStatus").textContent =
+                "⚠️ Processing is taking longer than expected. You can refresh the Documents page later.";
+        }
+
+        async function resetDocuments() {
+            if (!confirm("Reset the Qdrant collection? All indexed documents will be removed.")) return;
+            try {
+                await api("/api/documents/reset", { method: "DELETE" });
+                toast("Collection reset.");
+                await refreshDocuments();
+            } catch (err) {
+                toast("Reset failed: " + err.message);
+            }
+        }
+
+        async function refreshDocuments() {
+            try {
+                const stats = await api("/api/documents/stats");
+                const items = stats.documents || [];
+                const sources = [...new Set(
+                    items
+                        .map(d => d.source)
+                        .filter(Boolean)
+                )].sort((a, b) => a.localeCompare(b));
+
+                /* source dropdown */
+                const select = $("sourceSelect");
+                const current = select.value;
+                select.innerHTML = '<option value="">All documents</option>';
+                sources.forEach(doc => {
+                    const opt = document.createElement("option");
+                    opt.value = doc;
+                    opt.textContent = doc;
+                    select.appendChild(opt);
+                });
+                select.value = current;
+
+                /* pills */
+                const docCount = items.length;
+                $("docCountText").textContent = `${docCount} doc${docCount === 1 ? "" : "s"}`;
+                $("chunkPill").textContent = `${stats.totalChunks ?? 0} chunks indexed`;
+
+                /* stat cards */
+                const departments = new Set(items.map(d => d.department));
+                $("docStatGrid").innerHTML = `
+                <div class="stat"><div class="label">Documents</div><div class="value accent">${docCount}</div></div>
+                <div class="stat"><div class="label">Total chunks</div><div class="value">${stats.totalChunks ?? 0}</div></div>
+                <div class="stat"><div class="label">Departments</div><div class="value">${departments.size}</div></div>`;
+
+                /* table */
+                const tbody = $("docsTable").querySelector("tbody");
+                tbody.innerHTML = items.length
+                    ? items.map(d => `<tr>
+                        <td>📄 ${escapeHtml(d.source)}</td>
+                        <td><span class="badge info">${escapeHtml(d.department)}</span></td>
+                        <td><span class="badge plain">${escapeHtml(d.documentType)}</span></td>
+                        <td>${d.chunks}</td>
+                    </tr>`).join("")
+                    : '<tr><td colspan="4" class="muted">No documents indexed yet.</td></tr>';
+            } catch (err) {
+                toast("Could not load documents: " + err.message);
+            }
+        }
+
+        /* ================= Analytics ================= */
+        async function refreshAnalytics() {
+            try {
+                const [ragSummary, ragLogs, fbSummary, feedback] = await Promise.all([
+                    api("/api/rag-logs/summary"),
+                    api("/api/rag-logs"),
+                    api("/api/feedback/summary"),
+                    api("/api/feedback")
+                ]);
+
+                $("ragStatGrid").innerHTML = `
+                <div class="stat"><div class="label">Questions</div><div class="value accent">${ragSummary.totalQuestions}</div></div>
+                <div class="stat"><div class="label">High confidence</div><div class="value green">${ragSummary.highConfidence}</div></div>
+                <div class="stat"><div class="label">Medium confidence</div><div class="value amber">${ragSummary.mediumConfidence}</div></div>
+                <div class="stat"><div class="label">Low confidence</div><div class="value red">${ragSummary.lowConfidence}</div></div>
+                <div class="stat"><div class="label">Avg best score</div><div class="value">${ragSummary.averageBestScore}</div></div>
+                <div class="stat"><div class="label">Fallback searches</div><div class="value">${ragSummary.fallbackSearches}</div></div>
+                <div class="stat"><div class="label">Vector / Keyword / Hybrid</div>
+                    <div class="value" style="font-size:19px;">${ragSummary.totalVectorResults} / ${ragSummary.totalKeywordResults} / ${ragSummary.totalHybridResults}</div></div>
+                <div class="stat"><div class="label">Reranked questions</div><div class="value">${ragSummary.rerankedQuestions}</div></div>`;
+
+                const ragBody = $("ragLogsTable").querySelector("tbody");
+                ragBody.innerHTML = ragLogs.length
+                    ? ragLogs.map(l => `<tr>
+                        <td class="nowrap muted">${fmtTime(l.timestamp)}</td>
+                        <td><div class="clamp" title="${escapeHtml(l.question)}">${escapeHtml(l.question)}</div></td>
+                        <td><span class="badge ${confidenceClass(l.confidence)}">${escapeHtml(l.confidence ?? "—")}</span></td>
+                        <td>${Number(l.bestScore).toFixed(3)}</td>
+                        <td>${escapeHtml(l.detectedDepartment ?? "—")}</td>
+                        <td class="nowrap">${l.vectorResults} / ${l.keywordResults} / ${l.hybridResults}</td>
+                        <td>${l.rerankingApplied ? `${l.resultsBeforeReranking} → ${l.resultsAfterReranking}` : "—"}</td>
+                        <td>${l.usedFallbackSearch ? "yes" : "—"}</td>
+                    </tr>`).join("")
+                    : '<tr><td colspan="8" class="muted">No logs yet.</td></tr>';
+
+                $("feedbackStatGrid").innerHTML = `
+                <div class="stat"><div class="label">Total feedback</div><div class="value accent">${fbSummary.total}</div></div>
+                <div class="stat"><div class="label">Helpful</div><div class="value green">${fbSummary.helpful}</div></div>
+                <div class="stat"><div class="label">Not helpful</div><div class="value red">${fbSummary.notHelpful}</div></div>
+                <div class="stat"><div class="label">Helpful rate</div><div class="value">${fbSummary.helpfulRate}%</div></div>`;
+
+                const fbBody = $("feedbackTable").querySelector("tbody");
+                fbBody.innerHTML = feedback.length
+                    ? feedback.map(f => `<tr>
+                        <td class="nowrap muted">${fmtTime(f.timestamp)}</td>
+                        <td><div class="clamp" title="${escapeHtml(f.question)}">${escapeHtml(f.question)}</div></td>
+                        <td>${f.rating === "Helpful"
+                            ? '<span class="badge high">👍 Helpful</span>'
+                            : '<span class="badge low">👎 Not helpful</span>'}</td>
+                        <td><span class="badge ${confidenceClass(f.confidence)}">${escapeHtml(f.confidence ?? "—")}</span></td>
+                        <td>${f.bestScore != null ? Number(f.bestScore).toFixed(3) : "—"}</td>
+                    </tr>`).join("")
+                    : '<tr><td colspan="5" class="muted">No feedback yet.</td></tr>';
+            } catch (err) {
+                toast("Could not load analytics: " + err.message);
+            }
+        }
+
+        async function clearRagLogs() {
+            if (!confirm("Clear all RAG logs?")) return;
+            try {
+                await api("/api/rag-logs", { method: "DELETE" });
+                toast("RAG logs cleared.");
+                refreshAnalytics();
+            } catch (err) { toast("Failed: " + err.message); }
+        }
+
+        async function clearFeedback() {
+            if (!confirm("Clear all feedback?")) return;
+            try {
+                await api("/api/feedback", { method: "DELETE" });
+                toast("Feedback cleared.");
+                refreshAnalytics();
+            } catch (err) { toast("Failed: " + err.message); }
+        }
+
+        /* ================= Drag & drop ================= */
+        const dz = $("dropzone");
+        ["dragenter", "dragover"].forEach(ev =>
+            dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("dragover"); }));
+        ["dragleave", "drop"].forEach(ev =>
+            dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("dragover"); }));
+        dz.addEventListener("drop", e => {
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.toLowerCase().endsWith(".pdf")) {
+                $("pdfFile").files = e.dataTransfer.files;
+                fileChosen();
+            } else {
+                toast("Only PDF files are supported.");
+            }
+        });
+
+        /* ================= Init ================= */
+        restoreChat();
+        refreshDocuments();
+
+    </script>
+</body>
+</html>
